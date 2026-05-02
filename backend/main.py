@@ -1,6 +1,7 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends, Header, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from datetime import datetime
 import models, schemas, auth, csv, io
@@ -19,6 +20,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---------- STATIC FILES ----------
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+@app.get("/app")
+def serve_frontend():
+    return FileResponse("frontend/index.html")
+
 def get_db():
     db = SessionLocal()
     try:
@@ -29,17 +37,16 @@ def get_db():
 @app.get("/")
 def root():
     return {"message": "TaskPro API is running"}
+
 # ---------- AUTH ----------
 @app.post("/signup")
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     existing = db.query(models.User).filter(models.User.username == user.username).first()
     if existing:
         raise HTTPException(status_code=400, detail="Username already exists")
-    # Admin registration requires the secret code
     if user.role == "admin":
         if not user.admin_code or user.admin_code != ADMIN_SECRET_CODE:
             raise HTTPException(status_code=403, detail="Invalid admin secret code")
-    # Only allow valid roles
     if user.role not in ("admin", "member"):
         raise HTTPException(status_code=400, detail="Invalid role")
     hashed = auth.hash_password(user.password)
@@ -363,7 +370,6 @@ def export_xlsx(db: Session = Depends(get_db), token: str = Header(...)):
                 except: pass
             ws.column_dimensions[col_letter].width = min(max_len + 4, 40)
 
-    # SUMMARY SHEET
     ws_sum = wb.active
     ws_sum.title = "Summary"
     ws_sum.row_dimensions[1].height = 30
@@ -393,7 +399,6 @@ def export_xlsx(db: Session = Depends(get_db), token: str = Header(...)):
             cell.fill = fill; cell.alignment = left; cell.border = thin
     auto_width(ws_sum)
 
-    # PER-PROJECT SHEETS
     for project in projects:
         tasks = db.query(models.Task).filter(models.Task.project_id == project.id).all()
         owner = all_users.get(project.owner_id)
