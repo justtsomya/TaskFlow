@@ -7,3 +7,4 @@ pydantic
 openpyxl
 python-multipart
 bcrypt==4.0.1
+aiofiles
