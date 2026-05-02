@@ -21,11 +21,15 @@ app.add_middleware(
 )
 
 # ---------- STATIC FILES ----------
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # = /app/backend
+FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")  # = /app/frontend
+
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 @app.get("/app")
 def serve_frontend():
-    return FileResponse("frontend/index.html")
+    return FileResponse(os.path.join(FRONTEND_DIR, "login.html"))
 
 def get_db():
     db = SessionLocal()
