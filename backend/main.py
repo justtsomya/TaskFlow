@@ -26,6 +26,9 @@ def get_db():
     finally:
         db.close()
 
+@app.get("/")
+def root():
+    return {"message": "TaskPro API is running"}
 # ---------- AUTH ----------
 @app.post("/signup")
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
