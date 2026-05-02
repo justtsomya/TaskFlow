@@ -1,7 +1,9 @@
 fastapi
-uvicorn
+uvicorn[standard]
 sqlalchemy
 passlib[bcrypt]
 python-jose
 pydantic
 openpyxl
+python-multipart
+bcrypt==4.0.1
