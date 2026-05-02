@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskManager — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: rgba(255,255,255,0.07);
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #f0f0f8;
+    --muted: #7a7a9a;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Animated background */
+  .bg-orbs {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    animation: float 8s ease-in-out infinite;
+  }
+  .orb1 { width: 500px; height: 500px; background: var(--accent); top: -100px; left: -100px; animation-delay: 0s; }
+  .orb2 { width: 400px; height: 400px; background: var(--accent2); bottom: -80px; right: -80px; animation-delay: -3s; }
+  .orb3 { width: 300px; height: 300px; background: var(--accent3); top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -5s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(20px,-20px) scale(1.05); }
+    66% { transform: translate(-15px,15px) scale(0.95); }
+  }
+
+  /* Grid lines */
+  .grid-lines {
+    position: fixed;
+    inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    background: rgba(19,19,26,0.85);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px 40px;
+    width: 420px;
+    animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo-text span { color: var(--accent); }
+
+  h1 { font-family: var(--font-head); font-size: 28px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+
+  .field { margin-bottom: 16px; position: relative; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
+  .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .field input:focus { border-color: var(--accent); background: rgba(108,99,255,0.08); box-shadow: 0 0 0 3px rgba(108,99,255,0.12); }
+  .field input::placeholder { color: var(--muted); }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+  }
+  .btn-primary:hover::after { background: rgba(255,255,255,0.08); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .divider { text-align: center; margin: 20px 0; color: var(--muted); font-size: 13px; position: relative; }
+  .divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 20px);
+    height: 1px;
+    background: var(--border);
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+
+  .link-row { text-align: center; font-size: 14px; color: var(--muted); }
+  .link-row a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .link-row a:hover { text-decoration: underline; }
+
+  .error-msg { background: rgba(255,101,132,0.12); border: 1px solid rgba(255,101,132,0.3); color: #ff6584; border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .error-msg.show { display: block; animation: shake 0.3s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+</style>
+</head>
+<body>
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<div class="grid-lines"></div>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon"></div>
+    <div class="logo-text">Task<span>Pro</span></div>
+  </div>
+  <h1>Welcome back</h1>
+  <p class="subtitle">Sign in to your workspace</p>
+
+  <div class="error-msg" id="errMsg"></div>
+
+  <div class="field">
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Enter username" autocomplete="username">
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+  </div>
+
+  <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+
+  <div class="divider">or</div>
+  <div class="link-row">No account? <a href="signup.html">Create one</a></div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function showError(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+
+async function doLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  if (!username || !password) { showError('Please fill all fields'); return; }
+
+  try {
+    const res = await fetch(API + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.detail || data.error) { showError(data.detail || data.error); return; }
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('role', data.role);
+    localStorage.setItem('user_id', data.user_id);
+    localStorage.setItem('username', username);
+    window.location.href = 'dashboard.html';
+  } catch { showError('Cannot connect to backend. Is it running on port 8000?'); }
+}
+</script>
+</body>
+</html>
